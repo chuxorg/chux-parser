@@ -1,0 +1,14 @@
+# ignore things
+# .git
+# .cache
+.gitlab-ci.yml
+idc-okta-api
+Makefile
+*.md
+.gitignore
+node_modules
+Dockerfile*
+docker-compose*
+.vscode
+.dockerignore 
+tf/

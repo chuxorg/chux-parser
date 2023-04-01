@@ -1,0 +1,11 @@
+*lock.json
+*.okta-aws-cli-session
+.terraform/
+*.swp
+crash.log
+*.plan
+idc-okta-api
+pkg/
+.env
+_*Debug*
+app/__debug_bin

@@ -1,2 +1,2 @@
-okta issuer https://dev-29752729.okta.com/oauth2/default
+okta issuer 
 mongodb "mongodb://localhost:27017"

@@ -1,7 +1,10 @@
 package s3
 
-import "fmt"
+import (
+	"fmt"
 
+	"github.com/chuxorg/chux-models/models/products"
+)
 func Parse() {
 
 	//item := "202320/product/items_zzsounds.com-2023-03-20T18_20_42.720000.json"
@@ -10,6 +13,9 @@ func Parse() {
 
 	bucket := NewBucket(bucketName)
 	files := bucket.DownloadAll()
+	
+	product := products.NewProduct()
+	
 	for _, f := range files {
 		fmt.Printf("Name =%s  isProduct=%d", f.Name, f.IsProduct)
 	}

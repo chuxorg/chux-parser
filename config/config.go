@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 
+	"github.com/chuxorg/chux-models/config"
+	mcfg "github.com/chuxorg/chux-models/config"
 	"github.com/spf13/viper"
 )
 
@@ -19,19 +21,8 @@ type ParserConfig struct {
 		IssuerURL string `mapstructure:"issuerUrl"`
 		TokenURL  string `mapstructure:"tokenUrl"`
 	} `mapstructure:"auth"`
-	BizConfig struct {
-		DataStores []struct {
-			DataStore struct {
-				Mongo struct {
-					Target         string        `mapstructure:"target"`
-					URI            string        `mapstructure:"uri"`
-					Timeout        int 	         `mapstructure:"timeout"`
-					DatabaseName   string        `mapstructure:"databaseName"`
-					CollectionName string        `mapstructure:"collectionName"`
-				} `mapstructure:"mongo"`
-			} `mapstructure:"dataStore"`
-		} `mapstructure:"dataStores"`
-	} `mapstructure:"bizConfig"`
+	
+	BizObjConfig config.BizObjConfig `mapstructure:"dataStores"`
 }
 
 
@@ -54,20 +45,19 @@ func LoadConfig(env string) (*ParserConfig, error) {
 		return nil, fmt.Errorf("failed to unmarshal configuration: %v", err)
 	}
 
-	// Make sure the DataStores and DataStoreMap are initialized
-	if len(cfg.BizConfig.DataStores) == 0 {
-		cfg.BizConfig.DataStores = make([]struct {
-			DataStore struct {
-				Mongo struct {
-					Target         string        `mapstructure:"target"`
-					URI            string        `mapstructure:"uri"`
-					Timeout        int            `mapstructure:"timeout"`
-					DatabaseName   string        `mapstructure:"databaseName"`
-					CollectionName string        `mapstructure:"collectionName"`
-				} `mapstructure:"mongo"`
-			} `mapstructure:"dataStore"`
-		}, 0)
+	// Initialize BizObjConfig.DataStores.DataStoreMap if it's not already set
+	if cfg.BizObjConfig.DataStores.DataStoreMap == nil {
+		cfg.BizObjConfig.DataStores.DataStoreMap = make(map[string]mcfg.DataStoreConfig)
 	}
 
+	
 	return &cfg, nil
+}
+
+func GetBizObjConfig(cfg ParserConfig) mcfg.BizObjConfig {
+	bizObjConfig := mcfg.BizObjConfig{
+		Logging: cfg.Logging,
+		DataStores: cfg.BizObjConfig.DataStores,
+	}
+	return bizObjConfig
 }

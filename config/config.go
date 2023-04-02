@@ -3,33 +3,42 @@ package config
 import (
 	"fmt"
 
-	bmc "github.com/chuxorg/chux-models/config"
 	"github.com/spf13/viper"
 )
 
-// Config struct for webapp config
+
 type ParserConfig struct {
 	Logging struct {
 		Level string `mapstructure:"level"`
 	} `mapstructure:"logging"`
 	AWS struct {
-		S3BucketName   string `mapstructure:"bucketName", envconfig: "S3_BUCKET_NAME"`
-		S3DownloadPath string `mapstructure:"downloadPath", envconfig: "S3_DOWNLOAD_PATH"`
+		BucketName   string `mapstructure:"bucketName"`
+		DownloadPath string `mapstructure:"downloadPath"`
 	} `mapstructure:"aws"`
 	Auth struct {
-		//--This is the Okta Issuer Url for oAuth2
-		OktaOuth2Issuer string `mapstructure:"issuerUrl"`
-		//--The url where a token is requested
-		OktaOauth2TokenUrl string `mapstructure:"tokenUrl"`
+		IssuerURL string `mapstructure:"issuerUrl"`
+		TokenURL  string `mapstructure:"tokenUrl"`
 	} `mapstructure:"auth"`
-
-	BizConfig bmc.BizObjConfig `mapstructure:"bizObjConfig"`
-	
+	BizConfig struct {
+		DataStores []struct {
+			DataStore struct {
+				Mongo struct {
+					Target         string        `mapstructure:"target"`
+					URI            string        `mapstructure:"uri"`
+					Timeout        int 	         `mapstructure:"timeout"`
+					DatabaseName   string        `mapstructure:"databaseName"`
+					CollectionName string        `mapstructure:"collectionName"`
+				} `mapstructure:"mongo"`
+			} `mapstructure:"dataStore"`
+		} `mapstructure:"dataStores"`
+	} `mapstructure:"bizConfig"`
 }
+
+
 
 func LoadConfig(env string) (*ParserConfig, error) {
 	viper.SetConfigType("yaml")
-	viper.SetConfigName(fmt.Sprintf("config.%s.yaml", env)) // e.g., config.development.yaml or config.production.yaml
+	viper.SetConfigName(fmt.Sprintf("config.%s", env)) // e.g., config.development or config.production
 	viper.AddConfigPath(".")                           // Look for config files in the current directory
 	viper.AddConfigPath("./config")                    // Look for config files in the config directory
 	viper.AddConfigPath("../../config")
@@ -46,10 +55,19 @@ func LoadConfig(env string) (*ParserConfig, error) {
 	}
 
 	// Make sure the DataStores and DataStoreMap are initialized
-	if cfg.BizConfig.DataStores.DataStoreMap == nil {
-		cfg.BizConfig.DataStores.DataStoreMap = make(map[string]bmc.DataStoreConfig)
+	if len(cfg.BizConfig.DataStores) == 0 {
+		cfg.BizConfig.DataStores = make([]struct {
+			DataStore struct {
+				Mongo struct {
+					Target         string        `mapstructure:"target"`
+					URI            string        `mapstructure:"uri"`
+					Timeout        int            `mapstructure:"timeout"`
+					DatabaseName   string        `mapstructure:"databaseName"`
+					CollectionName string        `mapstructure:"collectionName"`
+				} `mapstructure:"mongo"`
+			} `mapstructure:"dataStore"`
+		}, 0)
 	}
 
 	return &cfg, nil
 }
-

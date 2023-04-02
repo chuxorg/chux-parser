@@ -9,7 +9,6 @@ require (
 	github.com/csailer/chux-mongo v1.1.8
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
-	github.com/go-playground/assert/v2 v2.2.0
 	github.com/okta/okta-jwt-verifier-golang v1.3.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2

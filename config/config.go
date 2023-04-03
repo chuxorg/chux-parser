@@ -29,11 +29,9 @@ type ParserConfig struct {
 
 func LoadConfig(env string) (*ParserConfig, error) {
 	viper.SetConfigType("yaml")
-	viper.SetConfigName(fmt.Sprintf("config.%s", env)) // e.g., config.development or config.production
-	viper.AddConfigPath(".")                           // Look for config files in the current directory
-	viper.AddConfigPath("./config")                    // Look for config files in the config directory
-	viper.AddConfigPath("../../config")
-
+	viper.SetConfigName(fmt.Sprintf("config.%s.yaml", env)) // e.g., config.development or config.production
+	viper.AddConfigPath("../config") // Look for config file in the parent directory/config
+	
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration file: %v", err)

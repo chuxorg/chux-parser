@@ -40,7 +40,7 @@ func New(options ...func(*Parser)) *Parser {
 	return parser
 }
 
-func WithConfig(config  cfg.ParserConfig) func(*Parser) {
+func WithConfig(config cfg.ParserConfig) func(*Parser) {
 	return func(product *Parser) {
 		_cfg = &config
 	}
@@ -49,7 +49,7 @@ func WithConfig(config  cfg.ParserConfig) func(*Parser) {
 func (p *Parser) Parse(fileName string) {
 
 	isProduct := true
-    
+
 	// Set the bizObjConfig variable to the value of the BizObjConfig field in the ParserConfig struct
 	bizObjConfig := config.GetBizObjConfig(*_cfg)
 	// Create the out and errOut channels
@@ -68,11 +68,11 @@ func (p *Parser) Parse(fileName string) {
 			} else {
 				// Process the JSON string (e.g., pass it to Product.SetState())
 				fmt.Println("JSON Object:", jsonStr)
-				if isProduct {			
+				if isProduct {
 					product := products.New(
 						products.WithBizObjConfig(bizObjConfig),
 					)
-					product.SetState(jsonStr)
+					product.Parse(jsonStr)
 					product.Save()
 				}
 			}
@@ -91,11 +91,7 @@ func (p *Parser) Parse(fileName string) {
 		}
 	}
 
-
-	
-	
 }
-
 
 // readJSONObjects reads a JSON file line by line, processes each JSON object,
 // and sends the JSON object as a string to the output channel.
@@ -151,4 +147,3 @@ func readJSONObjects(filePath string, out chan<- string, errOut chan<- error) {
 		errOut <- fmt.Errorf("error scanning file: %w", err)
 	}
 }
-

@@ -6,6 +6,8 @@ aws:
 auth:
   issuerUrl: https://dev-29752729.okta.com/oauth2/default
   tokenUrl: ""
+data:
+  path: "/home/csailer/projects/chux/chux-parser/data"
 bizConfig:
   dataStores:
     - dataStore:

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/chuxorg/chux-parser/config"
 	"github.com/chuxorg/chux-parser/internal/parsing"
 )
@@ -11,5 +15,28 @@ func main() {
 		panic(err)
 	}
 	parser := parsing.New(parsing.WithConfig(*cfg))
-	parser.Parse("items_guitarcenter.com-2023-03-20T18_53_00.897000.json")
+	files := getFiles(*cfg)
+	for _, f := range files {
+		//"items_sweetwater.com-2023-04-06T21_06_17.291000.jl"
+		parser.Parse(f)
+	}
+}
+
+func getFiles(cfg config.ParserConfig) []string {
+	retVal := []string{}
+	dir := cfg.DataPath.Path
+	// Walk the directory recursively and search for files with .jl extension
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		// Check if file extension is .jl
+		if filepath.Ext(path) == ".jl" {
+			retVal = append(retVal, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return retVal
 }

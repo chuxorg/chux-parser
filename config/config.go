@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-
 type ParserConfig struct {
 	Logging struct {
 		Level string `mapstructure:"level"`
@@ -21,17 +20,18 @@ type ParserConfig struct {
 		IssuerURL string `mapstructure:"issuerUrl"`
 		TokenURL  string `mapstructure:"tokenUrl"`
 	} `mapstructure:"auth"`
-	
+	DataPath struct {
+		Path string `mapstructure:"path"`
+	} `mapstructure:"data"`
+
 	BizObjConfig config.BizObjConfig `mapstructure:"dataStores"`
 }
-
-
 
 func LoadConfig(env string) (*ParserConfig, error) {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName(fmt.Sprintf("config.%s.yaml", env)) // e.g., config.development or config.production
-	viper.AddConfigPath("../config") // Look for config file in the parent directory/config
-	
+	viper.AddConfigPath("../config")                        // Look for config file in the parent directory/config
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration file: %v", err)
@@ -48,13 +48,12 @@ func LoadConfig(env string) (*ParserConfig, error) {
 		cfg.BizObjConfig.DataStores.DataStoreMap = make(map[string]mcfg.DataStoreConfig)
 	}
 
-	
 	return &cfg, nil
 }
 
 func GetBizObjConfig(cfg ParserConfig) mcfg.BizObjConfig {
 	bizObjConfig := mcfg.BizObjConfig{
-		Logging: cfg.Logging,
+		Logging:    cfg.Logging,
 		DataStores: cfg.BizObjConfig.DataStores,
 	}
 	return bizObjConfig

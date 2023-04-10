@@ -3,22 +3,22 @@ module github.com/chuxorg/chux-parser
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.234
+	github.com/aws/aws-sdk-go v1.44.239
 	github.com/bxcodec/faker/v3 v3.8.1
-	github.com/chuxorg/chux-models v1.0.1
+	github.com/chuxorg/chux-models v1.0.6
 	github.com/csailer/chux-mongo v1.1.8
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/okta/okta-jwt-verifier-golang v1.3.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	go.mongodb.org/mongo-driver v1.11.3
+	go.mongodb.org/mongo-driver v1.11.4
 )
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/chuxorg/chux-datastore v1.0.0 // indirect
+	github.com/chuxorg/chux-datastore v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

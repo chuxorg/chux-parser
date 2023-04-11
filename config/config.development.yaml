@@ -1,19 +1,25 @@
 logging:
   level: info
 aws:
-  bucketName: chux-crawler
-  downloadPath: ~/projects/chux/chux-parser
+   bucketName: chux-crawler
+   downloadPath: ~/projects/chux/data
+   profile: csailer
 auth:
   issuerUrl: https://dev-29752729.okta.com/oauth2/default
   tokenUrl: ""
 data:
-  path: "/home/csailer/projects/chux/chux-parser/data"
-bizConfig:
-  dataStores:
-    - dataStore:
-        mongo:
-          target: mongo
-          uri: mongodb://localhost:27017
-          timeout: 10
-          databaseName: chux-cprs
-          collectionName: ""
+   path: "/home/csailer/projects/chux/chux-parser/data"
+dataStores:
+  dataStore:
+    mongo:
+      target: mongo
+      uri: mongodb://localhost:27017
+      timeout: 10
+      databaseName: chux-cprs
+      collectionName: ""
+    redis:
+      target: redis
+      uri: redis://localhost:6379
+      timeout: 5
+      databaseName: your-redis-database-name
+      collectionName: your-redis-collection-name

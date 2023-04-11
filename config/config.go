@@ -3,10 +3,17 @@ package config
 import (
 	"fmt"
 
-	"github.com/chuxorg/chux-models/config"
-	mcfg "github.com/chuxorg/chux-models/config"
+	bo "github.com/chuxorg/chux-models/config"
 	"github.com/spf13/viper"
 )
+
+type DataStoreConfig struct {
+	Target         string `mapstructure:"target"`
+	URI            string `mapstructure:"uri"`
+	Timeout        int    `mapstructure:"timeout"`
+	DatabaseName   string `mapstructure:"databaseName"`
+	CollectionName string `mapstructure:"collectionName"`
+}
 
 type ParserConfig struct {
 	Logging struct {
@@ -15,6 +22,7 @@ type ParserConfig struct {
 	AWS struct {
 		BucketName   string `mapstructure:"bucketName"`
 		DownloadPath string `mapstructure:"downloadPath"`
+		Profile      string `mapstructure:"profile"`
 	} `mapstructure:"aws"`
 	Auth struct {
 		IssuerURL string `mapstructure:"issuerUrl"`
@@ -23,38 +31,79 @@ type ParserConfig struct {
 	DataPath struct {
 		Path string `mapstructure:"path"`
 	} `mapstructure:"data"`
-
-	BizObjConfig config.BizObjConfig `mapstructure:"dataStores"`
+	DataStores struct {
+		// A map of data store configurations keyed by the data store name
+		// e.g., "mongo" or "redis"
+		DataStoreMap map[string]DataStoreConfig `mapstructure:"dataStore"`
+	} `mapstructure:"dataStores"`
 }
 
+// LoadConfig reads and parses the YAML configuration file based on the given environment
+// and returns a ParserConfig instance containing the loaded configuration values.
 func LoadConfig(env string) (*ParserConfig, error) {
+	// Set the configuration file format
 	viper.SetConfigType("yaml")
-	viper.SetConfigName(fmt.Sprintf("config.%s.yaml", env)) // e.g., config.development or config.production
-	viper.AddConfigPath("../config")                        // Look for config file in the parent directory/config
 
+	// Set the configuration file name based on the environment
+	// e.g., config.development.yaml or config.production.yaml
+	viper.SetConfigName(fmt.Sprintf("config.%s", env))
+
+	// Add a path where Viper should look for the configuration file
+	// In this case, it will look for the file in the "../config" directory
+	viper.AddConfigPath("../config")
+
+	// Read the configuration file
 	err := viper.ReadInConfig()
 	if err != nil {
+		// Return an error if the configuration file could not be read
 		return nil, fmt.Errorf("failed to read configuration file: %v", err)
 	}
 
+	// Declare a ParserConfig instance to store the loaded configuration values
 	var cfg ParserConfig
+
+	// Unmarshal the loaded configuration values into the ParserConfig instance
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
+		// Return an error if the unmarshalling process failed
 		return nil, fmt.Errorf("failed to unmarshal configuration: %v", err)
 	}
 
-	// Initialize BizObjConfig.DataStores.DataStoreMap if it's not already set
-	if cfg.BizObjConfig.DataStores.DataStoreMap == nil {
-		cfg.BizObjConfig.DataStores.DataStoreMap = make(map[string]mcfg.DataStoreConfig)
+	// Initialize the DataStores.DataStoreMap field if it's not already set
+	// This ensures that the map is not nil and can be used later in the code
+	if cfg.DataStores.DataStoreMap == nil {
+		cfg.DataStores.DataStoreMap = make(map[string]DataStoreConfig)
 	}
 
+	// Return the ParserConfig instance containing the loaded configuration values
 	return &cfg, nil
 }
 
-func GetBizObjConfig(cfg ParserConfig) mcfg.BizObjConfig {
-	bizObjConfig := mcfg.BizObjConfig{
-		Logging:    cfg.Logging,
-		DataStores: cfg.BizObjConfig.DataStores,
+func NewBizObjConfig(parserConfig *ParserConfig) *bo.BizObjConfig {
+	return &bo.BizObjConfig{
+		Logging: struct {
+			Level string `mapstructure:"level"`
+		}{
+			Level: parserConfig.Logging.Level,
+		},
+		DataStores: struct {
+			DataStoreMap map[string]bo.DataStoreConfig `mapstructure:"dataStore"`
+		}{
+			DataStoreMap: ConvertDataStoreMap(parserConfig.DataStores.DataStoreMap),
+		},
 	}
-	return bizObjConfig
+}
+
+func ConvertDataStoreMap(src map[string]DataStoreConfig) map[string]bo.DataStoreConfig {
+	dst := make(map[string]bo.DataStoreConfig)
+	for k, v := range src {
+		dst[k] = bo.DataStoreConfig{
+			Target:         v.Target,
+			URI:            v.URI,
+			Timeout:        v.Timeout,
+			DatabaseName:   v.DatabaseName,
+			CollectionName: v.CollectionName,
+		}
+	}
+	return dst
 }

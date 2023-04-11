@@ -7,9 +7,9 @@ import (
 	"log"
 	"os"
 
+	bo "github.com/chuxorg/chux-models/config"
 	"github.com/chuxorg/chux-models/models/articles"
 	"github.com/chuxorg/chux-models/models/products"
-	"github.com/chuxorg/chux-parser/config"
 	cfg "github.com/chuxorg/chux-parser/config"
 )
 
@@ -20,6 +20,7 @@ type Parser struct {
 }
 
 var _cfg *cfg.ParserConfig
+var _bizObjConfig *bo.BizObjConfig
 
 // New returns a new Parser struct
 func New(options ...func(*Parser)) *Parser {
@@ -43,15 +44,13 @@ func New(options ...func(*Parser)) *Parser {
 func WithConfig(config cfg.ParserConfig) func(*Parser) {
 	return func(product *Parser) {
 		_cfg = &config
+		_bizObjConfig = cfg.NewBizObjConfig(_cfg)
 	}
 }
 
 func (p *Parser) Parse(fileName string) {
 
 	isProduct := true
-
-	// Set the bizObjConfig variable to the value of the BizObjConfig field in the ParserConfig struct
-	bizObjConfig := config.GetBizObjConfig(*_cfg)
 	// Create the out and errOut channels
 	out := make(chan string)
 	errOut := make(chan error)
@@ -68,9 +67,10 @@ func (p *Parser) Parse(fileName string) {
 			} else {
 				// Process the JSON string (e.g., pass it to Product.SetState())
 				fmt.Println("JSON Object:", jsonStr)
+
 				if isProduct {
 					product := products.New(
-						products.WithBizObjConfig(bizObjConfig),
+						products.WithBizObjConfig(*_bizObjConfig),
 					)
 					product.Parse(jsonStr)
 					product.Save()

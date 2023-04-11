@@ -1,7 +1,9 @@
 package s3
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -10,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/chuxorg/chux-parser/config"
 )
 
 type File struct {
@@ -27,20 +30,38 @@ type IBucket interface {
 }
 
 type Bucket struct {
-	Name    string
-	Profile string
-	Session *session.Session
+	Name         string
+	Profile      string
+	DownloadPath string
+	Session      *session.Session
 }
 
-func NewBucket(bucket string) *Bucket {
-	if len(bucket) == 0 {
-		return nil
+var _cfg *config.ParserConfig
+
+func New(options ...func(*Bucket)) *Bucket {
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
 	}
-	retVal := Bucket{
-		Name: bucket,
+
+	bucket := &Bucket{}
+	for _, option := range options {
+		option(bucket)
 	}
-	retVal.startSession()
-	return &retVal
+
+	if _cfg != nil {
+		bucket.Name = _cfg.AWS.BucketName
+		bucket.Profile = _cfg.AWS.Profile
+		bucket.DownloadPath = _cfg.AWS.DownloadPath
+	}
+
+	return bucket
+}
+
+func WithConfig(config config.ParserConfig) func(*Bucket) {
+	return func(product *Bucket) {
+		_cfg = &config
+	}
 }
 
 func newFile() *File {
@@ -102,7 +123,7 @@ func (b *Bucket) startSession() {
 	// create the session
 	var err error
 	sess, err := session.NewSessionWithOptions(session.Options{
-		Profile: "csailer",
+		Profile: string(b.Profile),
 	})
 
 	if err != nil {
@@ -124,6 +145,10 @@ func (b *Bucket) startSession() {
 //	A slice of File structs that describes the items that were downloaded
 func (b *Bucket) DownloadAll() []File {
 
+	if b.Session == nil {
+		b.startSession()
+	}
+
 	retVal := []File{}
 
 	resp, err := b.getObjects()
@@ -142,7 +167,15 @@ func (b *Bucket) DownloadAll() []File {
 		// append to the slice of Files
 		retVal = append(retVal, *file)
 		// Download the file
-		b.Download(&file.Name)
+		// if the downloadpath doesn't exist, create the directory
+		if _, err := os.Stat(b.DownloadPath); errors.Is(err, os.ErrNotExist) {
+			err := os.Mkdir(b.DownloadPath, os.ModePerm)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		fileName := b.DownloadPath + "/" + file.Name
+		b.Download(&fileName)
 	}
 
 	fmt.Println("Found", len(resp.Contents), "items in bucket", b.Name)

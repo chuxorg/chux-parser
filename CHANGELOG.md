@@ -1,7 +1,10 @@
 # Changelog
 
-## v1.0.1
+## v1.0.2
 
+* downloading from s3 successfuly (54922b9)
+* downloaded files for s3 (1c06f93)
+* refactored downloading from s3 (822bdb1)
 * Release Version: v1.0.1 (6e6a50e)
 * Release Version: ..1 (7c4cb8a)
 * making changes to bucket logic (bdae5f9)
@@ -15,6 +18,12 @@
 * updated make file with test and versioning (cda6a5a)
 * refactoring ParserConfig. Added yaml support for configuration (b1cc074)
 * initial commit (71aee5f)
+
+## v1.0.1
+
+* downloading from s3 successfuly (54922b9)
+* downloaded files for s3 (1c06f93)
+* refactored downloading from s3 (822bdb1)
 
 ## v1.0.0
 

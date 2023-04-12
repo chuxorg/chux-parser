@@ -17,3 +17,4 @@ items_*
 chux-parser-api
 .env
 .DS_Store
+app/data 

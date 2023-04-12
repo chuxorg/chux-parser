@@ -21,14 +21,14 @@ func main() {
 		panic(err)
 	}
 
-    cfg.AWS.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
+	cfg.AWS.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
 	cfg.AWS.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
 	bucket := s3.New(
 		s3.WithConfig(*cfg),
 	)
 
-	bucket.DownloadAll()
+	bucket.Download()
 
 	// parser := parsing.New(parsing.WithConfig(*cfg))
 	// files := getFiles(*cfg)

@@ -23,12 +23,6 @@ const basePath = "data/"
 type Line struct {
 	URL string `json:"url"`
 }
-type File struct {
-	Name         string
-	LastModified time.Time
-	Size         int64
-	IsProduct    bool
-}
 
 type IBucket interface {
 	getObjects() (*s3.ListObjectsV2Output, error)
@@ -84,7 +78,7 @@ func (b Bucket) logError(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg+"\n", args...)
 }
 
-func (b *Bucket) Download() error {
+func (b *Bucket) Download() ([]File, error) {
 	// Replace with your bucket and region
 	s3Bucket := _cfg.AWS.BucketName
 	region := os.Getenv("AWS_REGION")
@@ -101,9 +95,9 @@ func (b *Bucket) Download() error {
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(s3Bucket)})
 	if err != nil {
 		fmt.Println("Error listing objects:", err)
-		return err
+		return nil, err
 	}
-
+	var files []File
 	// Iterate through each object in the bucket
 	for _, item := range resp.Contents {
 		objectKey := *item.Key
@@ -149,22 +143,30 @@ func (b *Bucket) Download() error {
 			continue
 		}
 
-		// Create the subdir with date and time from the object key
-		dateTimeDir, err := b.formatDateDir(objectKey)
-		dateTimePath := filepath.Join(companyPath, dateTimeDir)
-		err = os.MkdirAll(dateTimePath, os.ModePerm)
-		if err != nil {
-			fmt.Println("Error creating date-time directory:", err)
-			continue
-		}
-
 		// Download the file to the newly created path
-		outputPath := filepath.Join(dateTimePath, companyName+".jl")
+		dateTime, err := b.formatDateDir(objectKey)
+		if err != nil {
+			fmt.Println("Error creating company directory:", err)
+		}
+		outputPath := filepath.Join(companyPath, companyName+"-"+dateTime+".jl")
 		err = b.downloadFile(fileReader.Body, outputPath)
 		if err != nil {
 			fmt.Println("Error downloading file:", err)
 		}
+		// Set a new File Struct to be used during parsing
+		file := File{
+			Path:         outputPath,
+			LastModified: *item.LastModified,
+			Size:         *item.Size,
+			IsProduct:    true,
+			IsParsed:     false,
+			DateCreated:  time.Now(),
+			DateModified: time.Now(),
+		}
+
+		files = append(files, file)
 	}
+	return files, nil
 }
 
 // The extractCompanyName function takes a raw URL string as input, parses it, and extracts the hostname.
@@ -215,8 +217,8 @@ func (b *Bucket) formatDateDir(objectKey string) (string, error) {
 	minute := matches[5]
 	second := matches[6]
 
-	// Format the date and time components as a directory name like "20230410-20.38.35"
-	dateTimeDir := fmt.Sprintf("%s%s%s-%s.%s.%s", year, month, day, hour, minute, second)
+	// Format the date and time components as part of the filename name like "20230410T20-38-35"
+	dateTimeDir := fmt.Sprintf("%s%s%sT%s-%s-%s", year, month, day, hour, minute, second)
 
 	return dateTimeDir, nil
 }

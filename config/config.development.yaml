@@ -23,3 +23,13 @@ dataStores:
       timeout: 5
       databaseName: your-redis-database-name
       collectionName: your-redis-collection-name
+productSources:
+  - ebay
+  - sweetwater
+  - perfectcircuit
+  - reverb
+  - thomann
+  - zzounds
+  - samash
+  - guitarcenter
+  - musicianfriend

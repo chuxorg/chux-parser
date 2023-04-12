@@ -39,11 +39,7 @@ type Bucket struct {
 var _cfg *config.ParserConfig
 
 func New(options ...func(*Bucket)) *Bucket {
-	env := os.Getenv("APP_ENV")
-	if env == "" {
-		env = "development"
-	}
-
+	
 	bucket := &Bucket{}
 	for _, option := range options {
 		option(bucket)
@@ -122,10 +118,10 @@ func (b *Bucket) startSession() {
 	}
 	// create the session
 	var err error
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Profile: string(b.Profile),
-	})
-
+	// sess, err := session.NewSessionWithOptions(session.Options{
+	// })
+	sess, err := session.NewSession()
+	
 	if err != nil {
 		b.logError("GetSession: couldn't create an AWS session", err)
 	}

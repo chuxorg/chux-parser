@@ -23,6 +23,9 @@ type ParserConfig struct {
 		BucketName   string `mapstructure:"bucketName"`
 		DownloadPath string `mapstructure:"downloadPath"`
 		Profile      string `mapstructure:"profile"`
+		Region       string `mapstructure:"region"`
+		AccessKey    string `mapstructure:"accessKey"`
+		SecretKey    string 
 	} `mapstructure:"aws"`
 	Auth struct {
 		IssuerURL string `mapstructure:"issuerUrl"`

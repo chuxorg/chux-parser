@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/chuxorg/chux-parser/config"
+	"github.com/google/uuid"
 )
 
 const basePath = "data/"
@@ -100,7 +101,6 @@ func (b *Bucket) Download() ([]File, error) {
 	var files []File
 	// Iterate through each object in the bucket
 	for _, item := range resp.Contents {
-		objectKey := *item.Key
 
 		// Download the object from S3
 		fileReader, err := svc.GetObject(&s3.GetObjectInput{
@@ -143,12 +143,13 @@ func (b *Bucket) Download() ([]File, error) {
 			continue
 		}
 
-		// Download the file to the newly created path
-		dateTime, err := b.formatDateDir(objectKey)
+		newUUID, err := uuid.NewRandom()
 		if err != nil {
-			fmt.Println("Error creating company directory:", err)
+			fmt.Printf("Error generating UUID: %v\n", err)
+			return nil, err
 		}
-		outputPath := filepath.Join(companyPath, companyName+"-"+dateTime+".jl")
+
+		outputPath := filepath.Join(companyPath, companyName+"-"+newUUID.String()+".jl")
 		err = b.downloadFile(fileReader.Body, outputPath)
 		if err != nil {
 			fmt.Println("Error downloading file:", err)
@@ -158,7 +159,7 @@ func (b *Bucket) Download() ([]File, error) {
 			Path:         outputPath,
 			LastModified: *item.LastModified,
 			Size:         *item.Size,
-			IsProduct:    true,
+			IsProduct:    b.isProduct(_cfg.Products, companyName),
 			IsParsed:     false,
 			DateCreated:  time.Now(),
 			DateModified: time.Now(),
@@ -196,33 +197,6 @@ func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
 	return matches[1], nil
 }
 
-// formatDateDir takes an S3 object key string and extracts the date and time
-// from the key, formatting it as a directory name like "20230410-20.38.35"
-func (b *Bucket) formatDateDir(objectKey string) (string, error) {
-	// Use a regular expression to match the date and time from the object key
-	// This regular expression looks for a date and time pattern like "2023-04-10T20-38-35"
-	re := regexp.MustCompile(`(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})`)
-	matches := re.FindStringSubmatch(objectKey)
-
-	// Check if the regular expression found a match
-	if len(matches) < 7 {
-		return "", fmt.Errorf("could not extract date and time from object key")
-	}
-
-	// Extract the matched date and time components
-	year := matches[1]
-	month := matches[2]
-	day := matches[3]
-	hour := matches[4]
-	minute := matches[5]
-	second := matches[6]
-
-	// Format the date and time components as part of the filename name like "20230410T20-38-35"
-	dateTimeDir := fmt.Sprintf("%s%s%sT%s-%s-%s", year, month, day, hour, minute, second)
-
-	return dateTimeDir, nil
-}
-
 // downloadFile downloads the file from the S3 bucket, reads it from fileReader, and saves it to the specified outputPath.
 // Input:
 // - fileReader: An io.ReadCloser from which the file content will be read.
@@ -251,4 +225,13 @@ func (b *Bucket) downloadFile(fileReader io.ReadCloser, outputPath string) error
 	}
 
 	return nil
+}
+
+func (b *Bucket) isProduct(slice []string, target string) bool {
+	for _, value := range slice {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }

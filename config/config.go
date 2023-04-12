@@ -25,7 +25,7 @@ type ParserConfig struct {
 		Profile      string `mapstructure:"profile"`
 		Region       string `mapstructure:"region"`
 		AccessKey    string `mapstructure:"accessKey"`
-		SecretKey    string 
+		SecretKey    string `mapstructure:"secretKey"`
 	} `mapstructure:"aws"`
 	Auth struct {
 		IssuerURL string `mapstructure:"issuerUrl"`
@@ -39,6 +39,7 @@ type ParserConfig struct {
 		// e.g., "mongo" or "redis"
 		DataStoreMap map[string]DataStoreConfig `mapstructure:"dataStore"`
 	} `mapstructure:"dataStores"`
+	Products []string `mapstructure:"productSources"`
 }
 
 // LoadConfig reads and parses the YAML configuration file based on the given environment

@@ -12,7 +12,7 @@ test:
 	
 .PHONY: release-version
 release-version:
-	./release_version.sh
+	./scripts/release_version.sh
 
 .PHONY: changelog
 changelog:

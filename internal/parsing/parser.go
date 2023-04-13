@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	bo "github.com/chuxorg/chux-models/config"
 	"github.com/chuxorg/chux-models/models/articles"
 	"github.com/chuxorg/chux-models/models/products"
+	"github.com/chuxorg/chux-parser/config"
 	cfg "github.com/chuxorg/chux-parser/config"
+	"github.com/chuxorg/chux-parser/internal/s3"
 )
 
 // Parser struct for parsing
@@ -48,15 +51,14 @@ func WithConfig(config cfg.ParserConfig) func(*Parser) {
 	}
 }
 
-func (p *Parser) Parse(fileName string) {
+func (p *Parser) Parse(file s3.File) {
 
-	isProduct := true
 	// Create the out and errOut channels
 	out := make(chan string)
 	errOut := make(chan error)
 
 	// Call the readJSONObjects function in a separate goroutine
-	go readJSONObjects(fileName, out, errOut)
+	go readJSONObjects(file.Path, out, errOut)
 
 	// Loop until both channels are closed and set to nil
 	for {
@@ -68,12 +70,32 @@ func (p *Parser) Parse(fileName string) {
 				// Process the JSON string (e.g., pass it to Product.SetState())
 				fmt.Println("JSON Object:", jsonStr)
 
-				if isProduct {
+				if file.IsProduct {
 					product := products.New(
 						products.WithBizObjConfig(*_bizObjConfig),
 					)
-					product.Parse(jsonStr)
-					product.Save()
+					var err error
+					err = product.Parse(jsonStr)
+					if err != nil {
+						fmt.Println(err)
+					}
+					err = product.Save()
+					if err != nil {
+						fmt.Println(err)
+					}
+				} else {
+					article := articles.New(
+						articles.WithBizObjConfig(*_bizObjConfig),
+					)
+					err := article.Parse(jsonStr)
+					if err != nil {
+						fmt.Println(err)
+					}
+					err = article.Save()
+					if err != nil {
+						fmt.Println(err)
+					}
+
 				}
 			}
 		case err, ok := <-errOut:
@@ -93,14 +115,12 @@ func (p *Parser) Parse(fileName string) {
 
 }
 
-// readJSONObjects reads a JSON file line by line, processes each JSON object,
-// and sends the JSON object as a string to the output channel.
-// It also sends any errors encountered to the error output channel.
 func readJSONObjects(filePath string, out chan<- string, errOut chan<- error) {
 	// Close both output channels after the function exits
 	defer close(out)
 	defer close(errOut)
-
+	megabytes := 5
+	byteSize := megabytes * 1024 * 1024
 	// Open the specified JSON file
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -113,8 +133,14 @@ func readJSONObjects(filePath string, out chan<- string, errOut chan<- error) {
 
 	// Create a new scanner to read the file line by line
 	scanner := bufio.NewScanner(file)
+	buf := make([]byte, 0, bufio.MaxScanTokenSize)
+	scanner.Buffer(buf, byteSize)
 	// Declare a variable to store each JSON object
 	var jsonObj map[string]interface{}
+
+	// Skip the first line
+	if scanner.Scan() {
+	} // Do nothing, just skip the first line
 
 	// Iterate over each line in the file
 	for scanner.Scan() {
@@ -146,4 +172,23 @@ func readJSONObjects(filePath string, out chan<- string, errOut chan<- error) {
 		// If an error occurs, send the error to the error output channel
 		errOut <- fmt.Errorf("error scanning file: %w", err)
 	}
+}
+
+func (p *Parser) GetFiles(cfg config.ParserConfig) []string {
+	retVal := []string{}
+	dir := cfg.AWS.DownloadPath
+	// Walk the directory recursively and search for files with .jl extension
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		// Check if file extension is .jl
+		if filepath.Ext(path) == ".jl" {
+			retVal = append(retVal, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return retVal
 }

@@ -20,12 +20,13 @@ type ParserConfig struct {
 		Level string `mapstructure:"level"`
 	} `mapstructure:"logging"`
 	AWS struct {
-		BucketName   string `mapstructure:"bucketName"`
-		DownloadPath string `mapstructure:"downloadPath"`
-		Profile      string `mapstructure:"profile"`
-		Region       string `mapstructure:"region"`
-		AccessKey    string `mapstructure:"accessKey"`
-		SecretKey    string `mapstructure:"secretKey"`
+		BucketName    string `mapstructure:"bucketName"`
+		DownloadPath  string `mapstructure:"downloadPath"`
+		ArchiveBucket string `mapstructure:"archiveBucket"`
+		Profile       string `mapstructure:"profile"`
+		Region        string `mapstructure:"region"`
+		AccessKey     string `mapstructure:"accessKey"`
+		SecretKey     string `mapstructure:"secretKey"`
 	} `mapstructure:"aws"`
 	Auth struct {
 		IssuerURL string `mapstructure:"issuerUrl"`

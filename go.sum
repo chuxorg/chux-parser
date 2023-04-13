@@ -53,6 +53,10 @@ github.com/chuxorg/chux-datastore v1.0.3 h1:jquFvbDqCITZAiNj1YTo/+kC97a3UezDD2GW
 github.com/chuxorg/chux-datastore v1.0.3/go.mod h1:X80SGgvWdvMa1SBf2GaIUa7m4vQSSpMT1rujr/ohBmo=
 github.com/chuxorg/chux-datastore v1.2.1 h1:/okbD6aAamp0z48k52uN/sFIz8YMei8zyOCysbLr5rE=
 github.com/chuxorg/chux-datastore v1.2.1/go.mod h1:X80SGgvWdvMa1SBf2GaIUa7m4vQSSpMT1rujr/ohBmo=
+github.com/chuxorg/chux-datastore v1.2.2 h1:edhzjqMZVWOYHaG3kG5qXFKoq1IPlCQSImMFz7s6M4Y=
+github.com/chuxorg/chux-datastore v1.2.2/go.mod h1:X80SGgvWdvMa1SBf2GaIUa7m4vQSSpMT1rujr/ohBmo=
+github.com/chuxorg/chux-datastore v1.2.3 h1:COkc8HxcNyBC0agQsEmqczvdlHA/+n6Yloz8KyfP+H4=
+github.com/chuxorg/chux-datastore v1.2.3/go.mod h1:X80SGgvWdvMa1SBf2GaIUa7m4vQSSpMT1rujr/ohBmo=
 github.com/chuxorg/chux-models v1.0.15 h1:2N4rSghb0iwzkiKsrB9phySVFRBm23LDJxcdlJjQi84=
 github.com/chuxorg/chux-models v1.0.15/go.mod h1:3N6QbWEeBfzQecuNzz23UR4K10Bla+/jbKD+JJwAJ1U=
 github.com/chuxorg/chux-models v1.0.16 h1:W64QYMoum4XtDzsI8IxVQ3uH2eKA8JTyN4EMj1O6Gi8=
@@ -69,6 +73,10 @@ github.com/chuxorg/chux-models v1.0.24 h1:R2V3d3/Q6PxkoVfAYinVYupdESqEaIWjET+ypT
 github.com/chuxorg/chux-models v1.0.24/go.mod h1:xaszbWvBHIBGwkre2oU/S89DJcS0K7EG9KUpHz1N8iw=
 github.com/chuxorg/chux-models v1.0.25 h1:7VmpO2S3VNBRMDblzL7GPIAkWUCoeEeThFojzOKKsfw=
 github.com/chuxorg/chux-models v1.0.25/go.mod h1:xaszbWvBHIBGwkre2oU/S89DJcS0K7EG9KUpHz1N8iw=
+github.com/chuxorg/chux-models v1.0.26 h1:omBw5W6exyDtZWgHCSdPlmnzssoeICNc4MSnUazRrf8=
+github.com/chuxorg/chux-models v1.0.26/go.mod h1:+LlphR55/MpoWmDs4AeqnQem4aBK0CPYB9lu+K+t7mI=
+github.com/chuxorg/chux-models v1.0.27 h1:ar0nUcJRtoBR+IK/FrIg+nuNc5tTJpwKLrm8ub9BGS8=
+github.com/chuxorg/chux-models v1.0.27/go.mod h1:eEu2sllvrBFFttv+ImkGavv+Lt8kRqueT+UkolcYUYk=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=

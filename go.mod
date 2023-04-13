@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/aws/aws-sdk-go v1.44.240
 	github.com/bxcodec/faker/v3 v3.8.1
-	github.com/chuxorg/chux-models v1.0.25
+	github.com/chuxorg/chux-models v1.0.27
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/okta/okta-jwt-verifier-golang v1.3.1
@@ -16,7 +16,7 @@ require (
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/chuxorg/chux-datastore v1.2.1 // indirect
+	github.com/chuxorg/chux-datastore v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

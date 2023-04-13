@@ -2,8 +2,9 @@ logging:
   level: info
 aws:
    bucketName: chux-crawler
-   downloadPath: ~/projects/chux/data
+   downloadPath: /home/csailer/projects/chux/chux-parser/app/data
    profile: csailer
+   archiveBucket: chux-crawler-arch
 auth:
   issuerUrl: https://dev-29752729.okta.com/oauth2/default
   tokenUrl: ""
@@ -32,4 +33,5 @@ productSources:
   - zzounds
   - samash
   - guitarcenter
-  - musicianfriend
+  - musiciansfriend
+  - thomannmusic

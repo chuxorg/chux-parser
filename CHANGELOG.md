@@ -1,8 +1,10 @@
 # Changelog
 
-## v1.0.2
+## v1.0.3
 
-* downloading from s3 successfuly (54922b9)
+* Updates to config. Enhanced Error handling for the Parser. (732afad)
+* updated change log (858c375)
+* downloading from s3 successfully (54922b9)
 * downloaded files for s3 (1c06f93)
 * refactored downloading from s3 (822bdb1)
 * Release Version: v1.0.1 (6e6a50e)
@@ -19,9 +21,14 @@
 * refactoring ParserConfig. Added yaml support for configuration (b1cc074)
 * initial commit (71aee5f)
 
+## v1.0.2
+
+* Updates to config. Enhanced Error handling for the Parser. (732afad)
+* updated change log (858c375)
+
 ## v1.0.1
 
-* downloading from s3 successfuly (54922b9)
+* downloading from s3 successfully (54922b9)
 * downloaded files for s3 (1c06f93)
 * refactored downloading from s3 (822bdb1)
 

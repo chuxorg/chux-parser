@@ -6,7 +6,6 @@ import (
 
 	"github.com/chuxorg/chux-parser/config"
 	"github.com/chuxorg/chux-parser/internal/parsing"
-	"github.com/chuxorg/chux-parser/internal/s3"
 	"github.com/joho/godotenv"
 )
 
@@ -23,18 +22,30 @@ func main() {
 	cfg.AWS.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
 	cfg.AWS.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
-	bucket := s3.New(
-		s3.WithConfig(*cfg),
-	)
+	/* 
+	 Download all files from S3 bucket
+	 Parse all files. This will create a new Product or Article for each line in the downloaded files
+	 Update the categories for each Product or Article. This will create a new Category for each unique category in the Product or Article
+	 Update/Create Company names in MongoDB
+	 Message the Image Service to download and process images via Kafka topic
+	 Messaage the Cache Service to update the cache via Kafka topic
+	 Move processed files to the processed s3 bucket
+	 Delete files from the downloaded s3 bucket
+	*/
 
-	files, err := bucket.Download()
-	if err != nil {
-		panic(err)
-	}
+	// bucket := s3.New(
+	//  	s3.WithConfig(*cfg),
+	// )
+
+	// files, err := bucket.Download()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	parser := parsing.New(parsing.WithConfig(*cfg))
-	//files := parser.GetFiles(*cfg)
-	for _, f := range files {
-		parser.Parse(f)
-	}
+	
+	// for _, f := range files {
+	// 	parser.Parse(f)
+	// }
+	err = parser.UpdateCategories()
 }

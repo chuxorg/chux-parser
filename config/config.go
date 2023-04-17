@@ -112,3 +112,15 @@ func ConvertDataStoreMap(src map[string]DataStoreConfig) map[string]bo.DataStore
 	}
 	return dst
 }
+
+// todo: refactor this. This is a hack to get the data store config for the mongo data store
+// There are two identical structs, one in the parser and one in the business object library.
+func ConvertDataStoreConfig(parserConfig DataStoreConfig) bo.DataStoreConfig {
+	return bo.DataStoreConfig{
+		Target:         parserConfig.Target,
+		URI:            parserConfig.URI,
+		Timeout:        parserConfig.Timeout,
+		DatabaseName:   parserConfig.DatabaseName,
+		CollectionName: parserConfig.CollectionName,
+	}
+}

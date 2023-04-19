@@ -8,13 +8,14 @@ import (
 // The file Struct is used to track the status of a file's
 // parsing and storage in the datastores
 type File struct {
-	Path         string    `json:"path"`
-	LastModified time.Time `json:"lastModified"`
-	Size         int64     `json:"size"`
-	IsParsed     bool      `json:"isParsed"`
-	IsProduct    bool      `json:"isProduct"`
-	DateCreated  time.Time `json:"dateCreated"`
-	DateModified time.Time `json:"dateModified"`
+	Content      string
+	LastModified time.Time
+	Size         int64
+	IsProduct    bool
+	IsParsed     bool
+	DateCreated  time.Time
+	DateModified time.Time
+	Path         string
 }
 
 func (f *File) ToString() string {

@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/url"
 	"os"
-	"path/filepath"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/chuxorg/chux-parser/config"
-	"github.com/google/uuid"
+	"golang.org/x/net/publicsuffix"
 )
 
 const basePath = "data/"
@@ -99,9 +99,13 @@ func (b *Bucket) Download() ([]File, error) {
 		return nil, err
 	}
 	var files []File
-	// Iterate through each object in the bucket
+
 	for _, item := range resp.Contents {
 
+		// make sure the item.Key does not contain the images folder
+		if strings.Contains(*item.Key, "/images/") {
+			continue
+		}
 		// Download the object from S3
 		fileReader, err := svc.GetObject(&s3.GetObjectInput{
 			Bucket: aws.String(s3Bucket),
@@ -112,7 +116,6 @@ func (b *Bucket) Download() ([]File, error) {
 			continue
 		}
 
-		// Read the first line (JSON object) from the file
 		lineReader := bufio.NewReader(fileReader.Body)
 		lineStr, err := lineReader.ReadString('\n')
 		if err != nil && err != io.EOF {
@@ -135,28 +138,17 @@ func (b *Bucket) Download() ([]File, error) {
 			continue
 		}
 
-		// Create the company directory if it doesn't exist
-		companyPath := filepath.Join(basePath, companyName)
-		err = os.MkdirAll(companyPath, os.ModePerm)
+		// Read the entire content of the file
+		contentBytes, err := ioutil.ReadAll(fileReader.Body)
 		if err != nil {
-			fmt.Println("Error creating company directory:", err)
+			fmt.Println("Error reading file content:", err)
 			continue
 		}
 
-		newUUID, err := uuid.NewRandom()
-		if err != nil {
-			fmt.Printf("Error generating UUID: %v\n", err)
-			return nil, err
-		}
+		content := string(contentBytes)
 
-		outputPath := filepath.Join(companyPath, companyName+"-"+newUUID.String()+".jl")
-		err = b.downloadFile(fileReader.Body, outputPath)
-		if err != nil {
-			fmt.Println("Error downloading file:", err)
-		}
-		// Set a new File Struct to be used during parsing
 		file := File{
-			Path:         outputPath,
+			Content:      content,
 			LastModified: *item.LastModified,
 			Size:         *item.Size,
 			IsProduct:    b.isProduct(_cfg.Products, companyName),
@@ -171,7 +163,7 @@ func (b *Bucket) Download() ([]File, error) {
 }
 
 // The extractCompanyName function takes a raw URL string as input, parses it, and extracts the hostname.
-// It then uses a regular expression to remove the domain extension and any subdomains (e.g., "www").
+// It then removes the domain extension and any subdomains (e.g., "www").
 // The resulting company name is returned.
 func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
 	// Parse the raw URL
@@ -182,51 +174,23 @@ func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
 	// Extract the hostname from the parsed URL
 	host := parsedURL.Hostname()
 
-	// Use a regular expression to match and remove the domain extension
-	// This regular expression matches the last segment of the domain name
-	// (e.g., "com", "edu") and any subdomains (e.g., "www")
-	re := regexp.MustCompile(`(?:\w+\.)?(\w+)\.\w+`)
-	matches := re.FindStringSubmatch(host)
-
-	// Check if the regular expression found a match
-	if len(matches) < 2 {
-		return "", fmt.Errorf("could not extract company name from URL")
+	// Use the public suffix library to obtain the effective TLD plus one
+	etldPlusOne, err := publicsuffix.EffectiveTLDPlusOne(host)
+	if err != nil {
+		return "", err
 	}
 
-	// Return the matched company name (the second element in the matches slice)
-	return matches[1], nil
+	// Remove the TLD plus one from the hostname
+	trimmedHost := strings.TrimSuffix(host, "."+etldPlusOne)
+
+	// Split the remaining hostname by dots and take the last part as the company name
+	parts := strings.Split(trimmedHost, ".")
+	companyName := parts[len(parts)-1]
+
+	return companyName, nil
 }
 
-// downloadFile downloads the file from the S3 bucket, reads it from fileReader, and saves it to the specified outputPath.
-// Input:
-// - fileReader: An io.ReadCloser from which the file content will be read.
-// - outputPath: The path where the downloaded file will be saved.
-// Returns: An error if something goes wrong during the file download and save process.
-func (b *Bucket) downloadFile(fileReader io.ReadCloser, outputPath string) error {
-	// Ensure the fileReader is closed after the function finishes.
-	defer fileReader.Close()
-
-	// Create a new file or open an existing one at the outputPath.
-	// This will also truncate the file if it already exists, meaning
-	// it will clear the existing content and set the file size to zero.
-	outputFile, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
-	}
-
-	// Ensure the outputFile is closed after the function finishes.
-	defer outputFile.Close()
-
-	// Copy the content from fileReader to outputFile.
-	// This will write the downloaded data from the S3 bucket into the file.
-	_, err = io.Copy(outputFile, fileReader)
-	if err != nil {
-		return fmt.Errorf("failed to copy data to output file: %w", err)
-	}
-
-	return nil
-}
-
+// The isProduct function takes a slice of strings and a target string as input.
 func (b *Bucket) isProduct(slice []string, target string) bool {
 	for _, value := range slice {
 		if value == target {

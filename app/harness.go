@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"log"
@@ -10,7 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func TestHarness() {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -33,7 +33,6 @@ func main() {
 	}
 
 	parser := parsing.New(parsing.WithConfig(*cfg))
-	//files := parser.GetFiles(*cfg)
 	for _, f := range files {
 		parser.Parse(f)
 	}

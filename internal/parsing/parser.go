@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	bo "github.com/chuxorg/chux-models/config"
 	"github.com/chuxorg/chux-models/models/articles"
@@ -191,4 +192,60 @@ func (p *Parser) GetFiles(cfg config.ParserConfig) []string {
 	}
 
 	return retVal
+}
+
+func readJSONObjects(content string, out chan<- string, errOut chan<- error) {
+	// Close both output channels after the function exits
+	defer close(out)
+	defer close(errOut)
+
+	// Declare a variable to store each JSON object
+	var jsonObj map[string]interface{}
+
+	// Use strings.NewReader to read the content string
+	reader := strings.NewReader(content)
+
+	// Create a new scanner to read the content line by line
+	scanner := bufio.NewScanner(reader)
+
+	// Skip the first line
+	if scanner.Scan() {
+	} // Do nothing, just skip the first line
+
+	// Iterate over each line in the file
+	for scanner.Scan() {
+		// Get the current line as a string
+		line := scanner.Text()
+
+		// Unmarshal the JSON line into the jsonObj variable
+		err = json.Unmarshal([]byte(line), &jsonObj)
+		if err != nil {
+			// If an error occurs, send the error to the error output channel
+			errOut <- fmt.Errorf("failed to unmarshal JSON object: %w", err)
+			continue
+		}
+
+		// Marshal the JSON object back to a JSON string
+		jsonStr, err := json.Marshal(jsonObj)
+		if err != nil {
+			// If an error occurs, send the error to the error output channel
+			errOut <- fmt.Errorf("failed to marshal JSON object: %w", err)
+			continue
+		}
+
+		// Send the JSON string to the output channel
+		out <- string(jsonStr)
+	}
+
+	// Check for any errors that occurred during the scanning process
+	if err := scanner.Err(); err != nil {
+		// If an error occurs, send the error to the error output channel
+		errOut <- fmt.Errorf("error scanning file: %w", err)
+	}
+
+	// Check for any errors that occurred during the scanning process
+	if err := scanner.Err(); err != nil {
+		// If an error occurs, send the error to the error output channel
+		errOut <- fmt.Errorf("error scanning content: %w", err)
+	}
 }

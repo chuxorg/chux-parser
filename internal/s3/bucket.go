@@ -20,6 +20,8 @@ import (
 
 const basePath = "data/"
 
+var _cfg *config.ParserConfig
+
 // Define a struct to hold the JSON object's URL field
 type Line struct {
 	URL string `json:"url"`
@@ -39,15 +41,13 @@ type Bucket struct {
 	Session      *session.Session
 }
 
-var _cfg *config.ParserConfig
-
 func New(options ...func(*Bucket)) *Bucket {
 
 	bucket := &Bucket{}
 	for _, option := range options {
 		option(bucket)
 	}
-
+	bucketName := _cfg.AWS.BucketName
 	if _cfg != nil {
 		bucket.Name = _cfg.AWS.BucketName
 		bucket.Profile = _cfg.AWS.Profile
@@ -151,7 +151,7 @@ func (b *Bucket) Download() ([]File, error) {
 			Content:      content,
 			LastModified: *item.LastModified,
 			Size:         *item.Size,
-			IsProduct:    b.isProduct(_cfg.Products, companyName),
+			IsProduct:    b.isProduct(companyName),
 			IsParsed:     false,
 			DateCreated:  time.Now(),
 			DateModified: time.Now(),
@@ -191,8 +191,22 @@ func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
 }
 
 // The isProduct function takes a slice of strings and a target string as input.
-func (b *Bucket) isProduct(slice []string, target string) bool {
-	for _, value := range slice {
+func (b *Bucket) isProduct(target string) bool {
+
+	productSources := []string{
+		"ebay",
+		"sweetwater",
+		"perfectcircuit",
+		"reverb",
+		"thomann",
+		"zzounds",
+		"samash",
+		"guitarcenter",
+		"musiciansfriend",
+		"thomannmusic",
+	}
+
+	for _, value := range productSources {
 		if value == target {
 			return true
 		}

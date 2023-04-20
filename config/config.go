@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	bo "github.com/chuxorg/chux-models/config"
+	"github.com/spf13/viper"
 )
 
 type DataStoreConfig struct {
@@ -30,6 +31,7 @@ type ParserConfig struct {
 		Region        string `mapstructure:"region"`
 		AccessKey     string `mapstructure:"accessKey"`
 		SecretKey     string `mapstructure:"secretKey"`
+		SecretPath    string `mapstructure:"secretPath"`
 	} `mapstructure:"aws"`
 	Auth struct {
 		IssuerURL string `mapstructure:"issuerUrl"`
@@ -46,9 +48,48 @@ type ParserConfig struct {
 	Products []string `mapstructure:"productSources"`
 }
 
+func LoadConfig(env string) (*ParserConfig, error) {
+	// Set the configuration file format
+	viper.SetConfigType("yaml")
+
+	// Set the configuration file name based on the environment
+	// e.g., config.development.yaml or config.production.yaml
+	viper.SetConfigName(fmt.Sprintf("config.%s", env))
+
+	// Add a path where Viper should look for the configuration file
+	// In this case, it will look for the file in the "../config" directory
+	viper.AddConfigPath("../config")
+
+	// Read the configuration file
+	err := viper.ReadInConfig()
+	if err != nil {
+		// Return an error if the configuration file could not be read
+		return nil, fmt.Errorf("failed to read configuration file: %v", err)
+	}
+
+	// Declare a ParserConfig instance to store the loaded configuration values
+	var cfg ParserConfig
+
+	// Unmarshal the loaded configuration values into the ParserConfig instance
+	err = viper.Unmarshal(&cfg)
+	if err != nil {
+		// Return an error if the unmarshalling process failed
+		return nil, fmt.Errorf("failed to unmarshal configuration: %v", err)
+	}
+
+	// Initialize the DataStores.DataStoreMap field if it's not already set
+	// This ensures that the map is not nil and can be used later in the code
+	if cfg.DataStores.DataStoreMap == nil {
+		cfg.DataStores.DataStoreMap = make(map[string]DataStoreConfig)
+	}
+
+	// Return the ParserConfig instance containing the loaded configuration values
+	return &cfg, nil
+}
+
 // LoadConfig reads and parses the YAML configuration file based on the given environment
 // and returns a ParserConfig instance containing the loaded configuration values.
-func LoadConfig() (*ParserConfig, error) {
+func GetSecret(name string) (string, error) {
 	// Create a new AWS session
 	sess := session.Must(session.NewSession())
 
@@ -66,12 +107,12 @@ func LoadConfig() (*ParserConfig, error) {
 	result, err := svc.GetSecretValueWithContext(context.Background(), input)
 	if err != nil {
 		fmt.Println("Error retrieving secret value:", err)
-		return nil, err
+		return "", err
 	}
 
 	// Print the secret value
 	fmt.Println("Secret value:", *result.SecretString) // Return the ParserConfig instance containing the loaded configuration values
-	return &cfg, nil
+	return *result.SecretString, nil
 }
 
 func NewBizObjConfig(parserConfig *ParserConfig) *bo.BizObjConfig {

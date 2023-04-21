@@ -47,20 +47,14 @@ func New(options ...func(*Bucket)) *Bucket {
 	for _, option := range options {
 		option(bucket)
 	}
-	bucketName := _cfg.AWS.BucketName
+	bucketName := os.Getenv("AWS_SOURCE_BUCKET")
 	if _cfg != nil {
-		bucket.Name = _cfg.AWS.BucketName
-		bucket.Profile = _cfg.AWS.Profile
-		bucket.DownloadPath = _cfg.AWS.DownloadPath
+		bucket.Name = bucketName
+		bucket.Profile = os.Getenv("AWS_PROFILE", "csailer")
+		bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH", "data/")
 	}
 
 	return bucket
-}
-
-func WithConfig(config config.ParserConfig) func(*Bucket) {
-	return func(product *Bucket) {
-		_cfg = &config
-	}
 }
 
 func newFile() *File {
@@ -81,7 +75,7 @@ func (b Bucket) logError(msg string, args ...interface{}) {
 
 func (b *Bucket) Download() ([]File, error) {
 	// Replace with your bucket and region
-	s3Bucket := _cfg.AWS.BucketName
+	s3Bucket := os.Getenv("AWS_SOURCE_BUCKET")
 	region := os.Getenv("AWS_REGION")
 
 	// Create a new AWS session with the specified region

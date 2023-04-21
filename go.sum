@@ -40,6 +40,7 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/aws/aws-sdk-go v1.44.240 h1:38f1qBTuzotDC6bgSNLw1vrrYaoWL8MNNzwTsGjP6TY=
 github.com/aws/aws-sdk-go v1.44.240/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
+github.com/aws/aws-sdk-go v1.44.247/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.8.0 h1:ea0Xadu+sHlu7x5O3gKhRpQ1IKiMrSiHttPF0ybECuA=
 github.com/bytedance/sonic v1.8.0/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
@@ -47,10 +48,14 @@ github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA
 github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06/go.mod h1:DH46F32mSOjUmXrMHnKwZdA8wcEefY7UVqBKYGjpdQY=
 github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 h1:qSGYFH7+jGhDF8vLC+iwCD4WpbV1EBDSzWkJODFLams=
 github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311/go.mod h1:b583jCggY9gE99b6G5LEC39OIiVsWj+R97kbl5odCEk=
+github.com/chuxorg/chux-crosscut v1.0.1 h1:2mwMY8zCsx4SKnDzRSDGZd+HFHLdokfh2EqoEzcMwkY=
+github.com/chuxorg/chux-crosscut v1.0.1/go.mod h1:y7w7f1fTs3AXArVW50UBEUcrU7CUr2Z1i2UQaNAc5xo=
 github.com/chuxorg/chux-datastore v1.2.3 h1:COkc8HxcNyBC0agQsEmqczvdlHA/+n6Yloz8KyfP+H4=
 github.com/chuxorg/chux-datastore v1.2.3/go.mod h1:X80SGgvWdvMa1SBf2GaIUa7m4vQSSpMT1rujr/ohBmo=
 github.com/chuxorg/chux-models v1.0.27 h1:ar0nUcJRtoBR+IK/FrIg+nuNc5tTJpwKLrm8ub9BGS8=
 github.com/chuxorg/chux-models v1.0.27/go.mod h1:eEu2sllvrBFFttv+ImkGavv+Lt8kRqueT+UkolcYUYk=
+github.com/chuxorg/chux-models v1.2.37 h1:IT+1Iwfaze/y6dA/Ak4cBEOaJEoc2Wvb31u36G76Ktw=
+github.com/chuxorg/chux-models v1.2.37/go.mod h1:PJK7mk0gka/wFmPtgWylAZ+f1dg57t2cJMXOl8iUH08=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=

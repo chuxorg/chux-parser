@@ -23,17 +23,21 @@ func TestHarness() {
 	cfg.AWS.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
 	cfg.AWS.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
-	bucket := s3.New(
-		s3.WithConfig(*cfg),
-	)
+	bucket := s3.New()
 
 	files, err := bucket.Download()
 	if err != nil {
 		panic(err)
 	}
 
-	parser := parsing.New(parsing.WithConfig(*cfg))
+	parser := parsing.New()
 	for _, f := range files {
 		parser.Parse(f)
 	}
+	filesInterface := make([]interface{}, len(files))
+	for i, file := range files {
+		filesInterface[i] = file
+	}
+	file := s3.File{}
+	file.Save(filesInterface)
 }

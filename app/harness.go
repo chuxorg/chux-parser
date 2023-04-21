@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/chuxorg/chux-parser/config"
-	"github.com/chuxorg/chux-parser/internal/parsing"
-	"github.com/chuxorg/chux-parser/internal/s3"
+	"github.com/chuxorg/chux-parser/parsing"
+	"github.com/chuxorg/chux-parser/s3"
 	"github.com/joho/godotenv"
 )
 

@@ -14,7 +14,7 @@ import (
 
 	"github.com/chuxorg/chux-parser/config"
 	cfg "github.com/chuxorg/chux-parser/config"
-	"github.com/chuxorg/chux-parser/internal/s3"
+	"github.com/chuxorg/chux-parser/s3"
 )
 
 // Parser struct for parsing

@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	bo "github.com/chuxorg/chux-models/config"
-	"github.com/chuxorg/chux-models/models/articles"
-	"github.com/chuxorg/chux-models/models/products"
+	"github.com/chuxorg/chux-models/models"
+
 	"github.com/chuxorg/chux-parser/config"
 	cfg "github.com/chuxorg/chux-parser/config"
 	"github.com/chuxorg/chux-parser/internal/s3"
@@ -19,8 +19,8 @@ import (
 
 // Parser struct for parsing
 type Parser struct {
-	products []products.Product
-	articles []articles.Article
+	products []models.Product
+	articles []models.Article
 }
 
 var _cfg *cfg.ParserConfig
@@ -72,7 +72,7 @@ func (p *Parser) Parse(file s3.File) {
 				fmt.Println("JSON Object:", jsonStr)
 
 				if file.IsProduct {
-					product := products.New()
+					product := models.Product()
 					var err error
 					err = product.Parse(jsonStr)
 					if err != nil {
@@ -83,7 +83,7 @@ func (p *Parser) Parse(file s3.File) {
 						fmt.Println(err)
 					}
 				} else {
-					article := articles.New()
+					article := models.NewArticle()
 					err := article.Parse(jsonStr)
 					if err != nil {
 						fmt.Println(err)

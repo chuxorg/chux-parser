@@ -72,7 +72,7 @@ func (p *Parser) Parse(file s3.File) {
 				fmt.Println("JSON Object:", jsonStr)
 
 				if file.IsProduct {
-					product := models.Product()
+					product := models.NewProduct()
 					var err error
 					err = product.Parse(jsonStr)
 					if err != nil {

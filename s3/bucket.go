@@ -50,8 +50,8 @@ func New(options ...func(*Bucket)) *Bucket {
 	bucketName := os.Getenv("AWS_SOURCE_BUCKET")
 	if _cfg != nil {
 		bucket.Name = bucketName
-		bucket.Profile = os.Getenv("AWS_PROFILE", "csailer")
-		bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH", "data/")
+		bucket.Profile = os.Getenv("AWS_PROFILE")
+		bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH")
 	}
 
 	return bucket

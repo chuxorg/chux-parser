@@ -42,7 +42,12 @@ func (f *File) ToJSON() string {
 func (f *File) Save(files []interface{}) error {
 	database := os.Getenv("MONGO_DATABASE")
 	collectionName := "files"
-	uri := os.Getenv("MONGO_URI") + os.Getenv("MONGO_DATABASE") + "?retryWrites=true&w=majority"
+	username := os.Getenv("MONGO_USER_NAME")
+	password := os.Getenv("MONGO_PASSWORD")
+
+	uri := os.Getenv("MONGO_URI")
+	mongoURL := fmt.Sprintf(uri, username, password)
+	uri = mongoURL + os.Getenv("MONGO_DATABASE") + "?retryWrites=true&w=majority"
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {

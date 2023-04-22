@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.248
-	github.com/chuxorg/chux-models v1.2.38
+	github.com/chuxorg/chux-models v1.2.39
 	github.com/gin-gonic/gin v1.9.0
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.15.0

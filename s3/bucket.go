@@ -50,7 +50,7 @@ func New(options ...func(*Bucket)) *Bucket {
 	bucketName := os.Getenv("AWS_SOURCE_BUCKET")
 	if _cfg != nil {
 		bucket.Name = bucketName
-		bucket.Profile = os.Getenv("AWS_PROFILE")
+		bucket.Profile = "csailer"
 		bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH")
 	}
 
@@ -76,7 +76,7 @@ func (b Bucket) logError(msg string, args ...interface{}) {
 func (b *Bucket) Download() ([]File, error) {
 	// Replace with your bucket and region
 	s3Bucket := os.Getenv("AWS_SOURCE_BUCKET")
-	region := os.Getenv("AWS_REGION")
+	region := "us-east-1"
 
 	// Create a new AWS session with the specified region
 	sess := session.Must(session.NewSession(&aws.Config{

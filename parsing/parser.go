@@ -4,16 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	bo "github.com/chuxorg/chux-models/config"
 	"github.com/chuxorg/chux-models/models"
 
-	"github.com/chuxorg/chux-parser/config"
-	cfg "github.com/chuxorg/chux-parser/config"
 	"github.com/chuxorg/chux-parser/s3"
 )
 
@@ -23,33 +19,14 @@ type Parser struct {
 	articles []models.Article
 }
 
-var _cfg *cfg.ParserConfig
-var _bizObjConfig *bo.BizObjConfig
-
 // New returns a new Parser struct
 func New(options ...func(*Parser)) *Parser {
-	env := os.Getenv("APP_ENV")
-	if env == "" {
-		env = "development"
-	}
-	var err error
-	_cfg, err = cfg.LoadConfig(env)
-	if err != nil {
-		log.Fatal(err)
-		return nil
-	}
+
 	parser := &Parser{}
 	for _, option := range options {
 		option(parser)
 	}
 	return parser
-}
-
-func WithConfig(config cfg.ParserConfig) func(*Parser) {
-	return func(product *Parser) {
-		_cfg = &config
-		_bizObjConfig = cfg.NewBizObjConfig(_cfg)
-	}
 }
 
 func (p *Parser) Parse(file s3.File) {
@@ -162,9 +139,9 @@ func readJSONObjects(content string, out chan<- string, errOut chan<- error) {
 	}
 }
 
-func (p *Parser) GetFiles(cfg config.ParserConfig) []string {
+func (p *Parser) GetFiles() []string {
 	retVal := []string{}
-	dir := cfg.AWS.DownloadPath
+	dir := os.Getenv("DOWNLOAD_PATH")
 	// Walk the directory recursively and search for files with .jl extension
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		// Check if file extension is .jl

@@ -1,27 +1,11 @@
 package app
 
 import (
-	"log"
-	"os"
-
-	"github.com/chuxorg/chux-parser/config"
 	"github.com/chuxorg/chux-parser/parsing"
 	"github.com/chuxorg/chux-parser/s3"
-	"github.com/joho/godotenv"
 )
 
 func TestHarness() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	cfg, err := config.LoadConfig("development")
-	if err != nil {
-		panic(err)
-	}
-
-	cfg.AWS.AccessKey = os.Getenv("AWS_ACCESS_KEY_ID")
-	cfg.AWS.SecretKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
 	bucket := s3.New()
 

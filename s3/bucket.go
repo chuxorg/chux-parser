@@ -3,9 +3,9 @@ package s3
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -14,13 +14,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/chuxorg/chux-parser/config"
+	"github.com/chuxorg/chux-parser/errors"
 	"golang.org/x/net/publicsuffix"
 )
 
 const basePath = "data/"
-
-var _cfg *config.ParserConfig
 
 // Define a struct to hold the JSON object's URL field
 type Line struct {
@@ -48,29 +46,11 @@ func New(options ...func(*Bucket)) *Bucket {
 		option(bucket)
 	}
 	bucketName := os.Getenv("AWS_SOURCE_BUCKET")
-	if _cfg != nil {
-		bucket.Name = bucketName
-		bucket.Profile = "csailer"
-		bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH")
-	}
+	bucket.Name = bucketName
+	bucket.Profile = "csailer"
+	bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH")
 
 	return bucket
-}
-
-func newFile() *File {
-	return &File{}
-}
-
-// Logs an Error Message
-// Inputs:
-//
-//	msg is the error message that occurred.
-//
-// Output:
-//
-//	None
-func (b Bucket) logError(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg+"\n", args...)
 }
 
 func (b *Bucket) Download() ([]File, error) {
@@ -89,31 +69,27 @@ func (b *Bucket) Download() ([]File, error) {
 	// List objects in the S3 bucket
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(s3Bucket)})
 	if err != nil {
-		fmt.Println("Error listing objects:", err)
-		return nil, err
+		log.Println("Bucket.Download() Error listing objects:", err)
+		return nil, errors.NewChuxParserError("Bucket.Download() Error listing objects:", err)
 	}
 	var files []File
 
 	for _, item := range resp.Contents {
 
-		// make sure the item.Key does not contain the images folder
-		if strings.Contains(*item.Key, "/images/") {
-			continue
-		}
 		// Download the object from S3
 		fileReader, err := svc.GetObject(&s3.GetObjectInput{
 			Bucket: aws.String(s3Bucket),
 			Key:    item.Key,
 		})
 		if err != nil {
-			fmt.Println("Error getting object:", err)
+			log.Println("Bucket.Download() Error getting object:", err)
 			continue
 		}
 
 		lineReader := bufio.NewReader(fileReader.Body)
 		lineStr, err := lineReader.ReadString('\n')
 		if err != nil && err != io.EOF {
-			fmt.Println("Error reading line:", err)
+			log.Println("Bucket.Download() Error reading line:", err)
 			continue
 		}
 
@@ -121,21 +97,21 @@ func (b *Bucket) Download() ([]File, error) {
 		var lineObj Line
 		err = json.Unmarshal([]byte(lineStr), &lineObj)
 		if err != nil {
-			fmt.Println("Error un-marshalling JSON:", err)
+			log.Println("Bucket.Download() Error un-marshalling JSON:", err)
 			continue
 		}
 
 		// Extract the FQDN from the URL
 		companyName, err := b.extractCompanyName(lineObj.URL)
 		if err != nil {
-			fmt.Println("Error extracting company name:", err)
+			log.Println("Bucket.Download() Error extracting company name:", err)
 			continue
 		}
 
 		// Read the entire content of the file
 		contentBytes, err := ioutil.ReadAll(fileReader.Body)
 		if err != nil {
-			fmt.Println("Error reading file content:", err)
+			log.Println("Bucket.Download() Error reading file content:", err)
 			continue
 		}
 
@@ -153,6 +129,7 @@ func (b *Bucket) Download() ([]File, error) {
 
 		files = append(files, file)
 	}
+	log.Print("Bucket.Download() Files Ready to Process: ", len(files))
 	return files, nil
 }
 

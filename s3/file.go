@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
-	"github.com/chuxorg/chux-parser/internal/errors"
+	"github.com/chuxorg/chux-parser/errors"
+	"github.com/chuxorg/chux-parser/logging"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,6 +24,7 @@ type File struct {
 	DateCreated  time.Time
 	DateModified time.Time
 	Path         string
+	ArchivedPath string
 }
 
 func (f *File) ToString() string {
@@ -39,7 +40,10 @@ func (f *File) ToJSON() string {
 	return string(data)
 }
 
+// Save saves the file to the MongoDB database using InsertMany (bulk insert)
 func (f *File) Save(files []interface{}) error {
+
+	logging.Debug("File.Save() called")
 	database := os.Getenv("MONGO_DATABASE")
 	collectionName := "files"
 	username := os.Getenv("MONGO_USER_NAME")
@@ -49,27 +53,37 @@ func (f *File) Save(files []interface{}) error {
 	mongoURL := fmt.Sprintf(uri, username, password)
 	uri = mongoURL + os.Getenv("MONGO_DATABASE") + "?retryWrites=true&w=majority"
 
+	maskedURI := fmt.Sprintf(uri, "******", "******") + "?retryWrites=true&w=majority"
+	logging.Info("Saving to MongoDB: %s", maskedURI)
+
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatal(err)
+		logging.Error("File.Save() error creating new client", err)
+		return errors.NewChuxParserError("File.Save() Error creating new client", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	logging.Info("Connecting to MongoDB with a 45 second timeout")
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
 
 	err = client.Connect(ctx)
 	if err != nil {
+		logging.Error("File.Save() error connecting to MongoDB", err)
 		return errors.NewChuxParserError("File.Save() Error connecting to MongoDB", err)
 	}
+    
+    logging.Info("Connected to MongoDB")
+
 	defer client.Disconnect(ctx)
 
 	collection := client.Database(database).Collection(collectionName)
-
+	logging.Info("Bulk Inserting %d files to MongoDB", len(files))
 	res, err := collection.InsertMany(ctx, files)
 	if err != nil {
+		logging.Error("File.Save() error calling InsertMany to MongoDB", err)
 		return errors.NewChuxParserError("File.Save() Error calling InsertMany to MongoDB", err)
 	}
+	logging.Info("Bulk inserted %d File documents.\n", len(res.InsertedIDs))
 
-	fmt.Printf("Inserted %d documents: %v\n", len(res.InsertedIDs), res.InsertedIDs)
 	return nil
 }

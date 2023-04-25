@@ -10,6 +10,7 @@ import (
 
 	"github.com/chuxorg/chux-models/models"
 
+	"github.com/chuxorg/chux-parser/logging"
 	"github.com/chuxorg/chux-parser/s3"
 )
 
@@ -21,7 +22,7 @@ type Parser struct {
 
 // New returns a new Parser struct
 func New(options ...func(*Parser)) *Parser {
-
+	logging.Debug("Creating new Parser struct")
 	parser := &Parser{}
 	for _, option := range options {
 		option(parser)
@@ -31,6 +32,10 @@ func New(options ...func(*Parser)) *Parser {
 
 func (p *Parser) Parse(file s3.File) {
 
+	productCount := 0
+	articleCount := 0
+
+	logging.Debug("Parser.Parse() called")
 	// Create the out and errOut channels
 	out := make(chan string)
 	errOut := make(chan error)
@@ -46,51 +51,59 @@ func (p *Parser) Parse(file s3.File) {
 				out = nil // Set the channel to nil to stop checking it
 			} else {
 				// Process the JSON string (e.g., pass it to Product.SetState())
-				fmt.Println("JSON Object:", jsonStr)
+				logging.Info("Parser.Parse() Parsing JSON Object:", jsonStr)
 
 				if file.IsProduct {
+					logging.Info("Parser.Parse() Parsing Product...")
 					product := models.NewProduct()
 					var err error
 					err = product.Parse(jsonStr)
 					if err != nil {
-						fmt.Println(err)
+						logging.Warning("Parser.Parse() Failed to parse product while calling product.Parse", err)
 					}
 					err = product.Save()
 					if err != nil {
-						fmt.Println(err)
+						logging.Error("Failed to save product", err)
+					} else {
+						productCount++ // Increment product count on successful save
 					}
 				} else {
+					logging.Info("Parsing Article...")
 					article := models.NewArticle()
 					err := article.Parse(jsonStr)
 					if err != nil {
-						fmt.Println(err)
+						logging.Error("Parser.Parse() Failed to parse article", err)
 					}
 					err = article.Save()
 					if err != nil {
-						fmt.Println(err)
+						logging.Error("Parser.Parse() Failed to save Article", err)
+					} else {
+						articleCount++ // Increment article count on successful save
 					}
-
 				}
+				logging.Info(fmt.Sprintf("Parser.Parse() Parsed %d Articles and %d Products", articleCount, productCount))
 			}
 		case err, ok := <-errOut:
 			if !ok {
 				errOut = nil // Set the channel to nil to stop checking it
 			} else {
 				// Handle the error (e.g., log it, exit the program, or take other appropriate action)
+				logging.Error("Parser.Parse() Error while parsing JSON Object", err)
 				fmt.Println("Error:", err)
 			}
 		}
 
 		// Break the loop when both channels are closed and set to nil
 		if out == nil && errOut == nil {
+			logging.Info("Parser.Parse() Finished parsing file")
 			break
 		}
 	}
-
+	logging.Info(fmt.Sprintf("Parsed a total of %d Articles and %d Products", articleCount, productCount))
 }
 
 func readJSONObjects(content string, out chan<- string, errOut chan<- error) {
-
+	logging.Debug("readJSONObjects() go routine called")
 	defer close(out)
 	defer close(errOut)
 
@@ -108,6 +121,7 @@ func readJSONObjects(content string, out chan<- string, errOut chan<- error) {
 	} // Do nothing, just skip the first line
 
 	// Iterate over each line in the file
+	logging.Info("readJSONObjects() Iterating over each line in the file")
 	for scanner.Scan() {
 		// Get the current line as a string
 		line := scanner.Text()

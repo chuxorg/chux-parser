@@ -112,9 +112,12 @@ func readJSONObjects(content string, out chan<- string, errOut chan<- error) {
 
 	// Use strings.NewReader to read the content string
 	reader := strings.NewReader(content)
-
-	// Create a new scanner to read the content line by line
 	scanner := bufio.NewScanner(reader)
+
+	// Set the buffer size to 50MB
+	const bufferSize = 50 * 1024 * 1024 // 50MB buffer size
+	buffer := make([]byte, bufferSize)
+	scanner.Buffer(buffer, bufferSize)
 
 	// Skip the first line
 	if scanner.Scan() {

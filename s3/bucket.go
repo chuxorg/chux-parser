@@ -122,7 +122,7 @@ func (b *Bucket) Download() ([]File, error) {
 		}
 
 		content := string(contentBytes)
-		if companyName != "ebay" {
+		if !strings.Contains(strings.ToLower(companyName), "ebay") {
 			file := File{
 				Content:      content,
 				LastModified: *item.LastModified,
@@ -170,6 +170,7 @@ func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
 
 // The isProduct function takes a slice of strings and a target string as input.
 func (b *Bucket) isProduct(target string) bool {
+
 	productSources := []string{
 		"ebay",
 		"sweetwater",
@@ -183,7 +184,7 @@ func (b *Bucket) isProduct(target string) bool {
 		"thomannmusic",
 	}
 
-	target = strings.ToLower(target)
+	target = strings.ToLower(strings.TrimSpace(target))
 
 	for _, value := range productSources {
 		if value == target {

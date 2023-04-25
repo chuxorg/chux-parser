@@ -122,7 +122,7 @@ func (b *Bucket) Download() ([]File, error) {
 		}
 
 		content := string(contentBytes)
-		if !strings.Contains(strings.ToLower(companyName), "ebay") {
+		if !strings.Contains(strings.ToLower(companyName), "ebay") && companyName != "" {
 			file := File{
 				Content:      content,
 				LastModified: *item.LastModified,

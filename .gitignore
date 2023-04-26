@@ -20,3 +20,5 @@ chux-parser-api
 app/data
 app/__debug_bin
 __debug_bin 
+logs/*
+logs/

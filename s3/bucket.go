@@ -17,10 +17,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/chuxorg/chux-parser/errors"
 	"github.com/chuxorg/chux-parser/logging"
-	"golang.org/x/net/publicsuffix"
 )
 
 const basePath = "data/"
+
+var logger *logging.Logger
 
 // Define a struct to hold the JSON object's URL field
 type Line struct {
@@ -39,23 +40,32 @@ type Bucket struct {
 	Profile      string
 	DownloadPath string
 	Session      *session.Session
+	Logger       *logging.Logger
 }
 
 func New(options ...func(*Bucket)) *Bucket {
-	logging.Debug("Creating new Bucket struct")
+
 	bucket := &Bucket{}
 	for _, option := range options {
 		option(bucket)
 	}
+	bucket.Logger.Debug("Creating new Bucket struct")
 	bucketName := os.Getenv("AWS_SOURCE_BUCKET")
 	bucket.Name = bucketName
 	bucket.Profile = "csailer"
 	bucket.DownloadPath = os.Getenv("AWS_DOWNLOAD_PATH")
-	logging.Debug("Bucket struct created with the following settings\nName: %s\nProfile: %s\nDownloadPath: %s", bucket.Name, bucket.Profile, bucket.DownloadPath)
+	bucket.Logger.Debug("Bucket struct created with the following settings\nName: %s\nProfile: %s\nDownloadPath: %s", bucket.Name, bucket.Profile, bucket.DownloadPath)
 	return bucket
 }
 
+func WithLogger(l *logging.Logger) func(*Bucket) {
+	return func(b *Bucket) {
+		b.Logger = l
+	}
+}
+
 func (b *Bucket) Download() ([]File, error) {
+	logging := b.Logger
 	logging.Debug("Bucket.Download() called")
 	s3Bucket := os.Getenv("AWS_SOURCE_BUCKET")
 	region := "us-east-1"
@@ -144,28 +154,22 @@ func (b *Bucket) Download() ([]File, error) {
 // It then removes the domain extension and any subdomains (e.g., "www").
 // The resulting company name is returned.
 func (b *Bucket) extractCompanyName(rawURL string) (string, error) {
-	// Parse the raw URL
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
 		return "", err
 	}
-	// Extract the hostname from the parsed URL
-	host := parsedURL.Hostname()
 
-	// Use the public suffix library to obtain the effective TLD plus one
-	etldPlusOne, err := publicsuffix.EffectiveTLDPlusOne(host)
-	if err != nil {
-		return "", err
+	hostname := parsedURL.Hostname()
+	parts := strings.Split(hostname, ".")
+
+	var domain string
+	if len(parts) >= 2 {
+		domain = parts[len(parts)-2]
+	} else {
+		domain = hostname
 	}
 
-	// Remove the TLD plus one from the hostname
-	trimmedHost := strings.TrimSuffix(host, "."+etldPlusOne)
-
-	// Split the remaining hostname by dots and take the last part as the company name
-	parts := strings.Split(trimmedHost, ".")
-	companyName := parts[len(parts)-1]
-
-	return companyName, nil
+	return domain, nil
 }
 
 // The isProduct function takes a slice of strings and a target string as input.

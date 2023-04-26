@@ -25,6 +25,26 @@ type File struct {
 	DateModified time.Time
 	Path         string
 	ArchivedPath string
+	Logger       *logging.Logger
+}
+
+func NewFile(options ...func(*File)) *File {
+
+	file := &File{}
+	for _, option := range options {
+		option(file)
+	}
+	file.DateCreated = time.Now()
+	file.DateModified = time.Now()
+	file.IsParsed = false
+	file.IsProduct = false
+	return file
+}
+
+func FileWithLogger(logger *logging.Logger) func(*File) {
+	return func(file *File) {
+		file.Logger = logger
+	}
 }
 
 func (f *File) ToString() string {
@@ -42,7 +62,7 @@ func (f *File) ToJSON() string {
 
 // Save saves the file to the MongoDB database using InsertMany (bulk insert)
 func (f *File) Save(files []interface{}) error {
-
+	logging := f.Logger
 	logging.Debug("File.Save() called")
 	database := os.Getenv("MONGO_DATABASE")
 	collectionName := "files"
@@ -71,8 +91,8 @@ func (f *File) Save(files []interface{}) error {
 		logging.Error("File.Save() error connecting to MongoDB", err)
 		return errors.NewChuxParserError("File.Save() Error connecting to MongoDB", err)
 	}
-    
-    logging.Info("Connected to MongoDB")
+
+	logging.Info("Connected to MongoDB")
 
 	defer client.Disconnect(ctx)
 

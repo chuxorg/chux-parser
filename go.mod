@@ -4,11 +4,10 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.250
-	github.com/chuxorg/chux-datastore v1.2.8
-	github.com/chuxorg/chux-models v1.2.47
+	github.com/chuxorg/chux-datastore v1.2.10
+	github.com/chuxorg/chux-models v1.2.48
 	github.com/gin-gonic/gin v1.9.0
 	go.mongodb.org/mongo-driver v1.11.4
-	golang.org/x/net v0.9.0
 )
 
 require (
@@ -39,9 +38,10 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

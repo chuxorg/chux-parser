@@ -104,7 +104,13 @@ func (f *File) Save(files []interface{}) error {
 	logging.Info("Inserting %d files to MongoDB", len(files))
 	cnt := 0
 	for _, file := range files {
-		_, err := collection.InsertOne(ctx, file)
+		f, ok := file.(File)
+		if !ok {
+			// handle error when file is not of type File
+			continue
+		}
+		f.Content = ""
+		_, err := collection.InsertOne(ctx, f)
 		if err != nil {
 			logging.Error("File.Save() error calling InsertOne to MongoDB", err)
 			continue

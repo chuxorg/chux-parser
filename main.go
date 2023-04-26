@@ -56,20 +56,6 @@ func main() {
 	}
 	elapsedTime := time.Since(startTime).Seconds()
 	logger.Info("Parsed %d Articles and Products in %d seconds", len(files), elapsedTime)
-
-	filesInterface := make([]interface{}, len(files))
-	for i, file := range files {
-		filesInterface[i] = file
-	}
-	file := s3.NewFile(
-		s3.FileWithLogger(logger),
-	)
-	logger.Info("Saving information of %d file to MongoDB", len(files))
-	err = file.Save(filesInterface)
-	if err != nil {
-		logger.Error("Failed to save files to MongoDB", err)
-		panic(err)
-	}
 }
 
 func setUpLogging() {

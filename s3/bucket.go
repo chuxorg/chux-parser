@@ -131,14 +131,16 @@ func (b *Bucket) Download() ([]File, error) {
 			continue
 		}
 
-		content := string(contentBytes)
 		if !strings.Contains(strings.ToLower(companyName), "ebay") && companyName != "" {
+
 			file := File{
-				Content:      content,
+				Company:      companyName,
+				Content:      string(contentBytes),
 				LastModified: *item.LastModified,
 				Size:         *item.Size,
 				IsProduct:    b.isProduct(companyName),
 				IsParsed:     false,
+				Path:         *item.Key,
 				DateCreated:  time.Now(),
 				DateModified: time.Now(),
 			}
@@ -186,6 +188,7 @@ func (b *Bucket) isProduct(target string) bool {
 		"guitarcenter",
 		"musiciansfriend",
 		"thomannmusic",
+		"amazon",
 	}
 
 	target = strings.ToLower(strings.TrimSpace(target))

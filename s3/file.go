@@ -9,6 +9,7 @@ import (
 
 	"github.com/chuxorg/chux-parser/errors"
 	"github.com/chuxorg/chux-parser/logging"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -16,16 +17,19 @@ import (
 // The file Struct is used to track the status of a file's
 // parsing and storage in the datastores
 type File struct {
-	Content      string
-	LastModified time.Time
-	Size         int64
-	IsProduct    bool
-	IsParsed     bool
-	DateCreated  time.Time
-	DateModified time.Time
-	Path         string
-	ArchivedPath string
-	Logger       *logging.Logger
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	OwnerID      primitive.ObjectID `bson:"ownerId,omitempty" json:"ownerId,omitempty"`
+	Company      string             `bson:"company, omitempty" json:"company,omitempty"`
+	Content      string             `bson:"content", omitempty" json:"content,omitempty"`
+	LastModified time.Time          `bson:"lastModified", omitempty" json:"lastModified,omitempty"`
+	Size         int64              `bson:"size", omitempty" json:"size,omitempty"`
+	IsProduct    bool               `bson:"isProduct", omitempty" json:"isProduct,omitempty"`
+	IsParsed     bool               `bson:"isParsed", omitempty" json:"isParsed,omitempty"`
+	DateCreated  time.Time          `bson:"dateCreated", omitempty" json:"dateCreated,omitempty"`
+	DateModified time.Time          `bson:"dateModified", omitempty" json:"dateModified,omitempty"`
+	Path         string             `bson:"path", omitempty" json:"path,omitempty"`
+	ArchivedPath string             `bson:"archivedPath", omitempty" json:"archivedPath,omitempty"`
+	Logger       *logging.Logger    `bson:"-" json:"-"`
 }
 
 func NewFile(options ...func(*File)) *File {
@@ -97,13 +101,18 @@ func (f *File) Save(files []interface{}) error {
 	defer client.Disconnect(ctx)
 
 	collection := client.Database(database).Collection(collectionName)
-	logging.Info("Bulk Inserting %d files to MongoDB", len(files))
-	res, err := collection.InsertMany(ctx, files)
-	if err != nil {
-		logging.Error("File.Save() error calling InsertMany to MongoDB", err)
-		return errors.NewChuxParserError("File.Save() Error calling InsertMany to MongoDB", err)
+	logging.Info("Inserting %d files to MongoDB", len(files))
+	cnt := 0
+	for _, file := range files {
+		_, err := collection.InsertOne(ctx, file)
+		if err != nil {
+			logging.Error("File.Save() error calling InsertOne to MongoDB", err)
+			continue
+		}
+		cnt++
 	}
-	logging.Info("Bulk inserted %d File documents.\n", len(res.InsertedIDs))
+
+	logging.Info("Inserted %d File documents.\n", cnt)
 
 	return nil
 }

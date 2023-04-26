@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	ml "github.com/chuxorg/chux-models/logging"
 	"github.com/chuxorg/chux-models/models"
@@ -78,6 +79,11 @@ func (p *Parser) Parse(file s3.File) {
 					} else {
 						productCount++ // Increment product count on successful save
 					}
+					file.IsProduct = true
+					file.OwnerID = product.ID
+					file.IsParsed = true
+					file.LastModified = time.Now()
+
 				} else {
 					p.Logger.Info("Parsing Article...")
 					article := models.NewArticle(
@@ -93,6 +99,10 @@ func (p *Parser) Parse(file s3.File) {
 					} else {
 						articleCount++ // Increment article count on successful save
 					}
+					file.IsProduct = false
+					file.OwnerID = article.ID
+					file.IsParsed = true
+					file.LastModified = time.Now()
 				}
 				p.Logger.Info(fmt.Sprintf("Parser.Parse() Parsed %d Articles and %d Products", articleCount, productCount))
 			}

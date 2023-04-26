@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	ml "github.com/chuxorg/chux-models/logging"
 	"github.com/chuxorg/chux-models/models"
-
 	"github.com/chuxorg/chux-parser/logging"
 	"github.com/chuxorg/chux-parser/s3"
 )
@@ -42,7 +42,7 @@ func (p *Parser) Parse(file s3.File) {
 
 	productCount := 0
 	articleCount := 0
-
+	modelsLogger := ml.NewLogger(ml.LogLevelDebug)
 	p.Logger.Debug("Parser.Parse() called")
 	// Create the out and errOut channels
 	out := make(chan string)
@@ -63,7 +63,10 @@ func (p *Parser) Parse(file s3.File) {
 
 				if file.IsProduct {
 					p.Logger.Info("Parser.Parse() Parsing Product...")
-					product := models.NewProduct()
+
+					product := models.NewProduct(
+						models.NewProductWithLogger(*modelsLogger),
+					)
 					var err error
 					err = product.Parse(jsonStr)
 					if err != nil {
@@ -77,7 +80,9 @@ func (p *Parser) Parse(file s3.File) {
 					}
 				} else {
 					p.Logger.Info("Parsing Article...")
-					article := models.NewArticle()
+					article := models.NewArticle(
+						models.NewArticleWithLogger(*modelsLogger),
+					)
 					err := article.Parse(jsonStr)
 					if err != nil {
 						p.Logger.Error("Parser.Parse() Failed to parse article", err)

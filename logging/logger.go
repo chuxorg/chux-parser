@@ -44,24 +44,36 @@ func (l *Logger) SetLogLevel(level LogLevel) {
 }
 
 func (l *Logger) Info(format string, v ...interface{}) {
+	if l == nil || l.level > LogLevelInfo {
+		return
+	}
 	if l.level <= LogLevelInfo {
 		l.Output(2, l.iso8601Formatter("[INFO] ", format, v...))
 	}
 }
 
 func (l *Logger) Debug(format string, v ...interface{}) {
+	if l == nil || l.level > LogLevelDebug {
+		return
+	}
 	if l.level <= LogLevelDebug {
 		l.Output(2, l.iso8601Formatter("[DEBUG] ", format, v...))
 	}
 }
 
 func (l *Logger) Warning(format string, v ...interface{}) {
+	if l == nil || l.level > LogLevelWarning {
+		return
+	}
 	if l.level <= LogLevelWarning {
 		l.Output(2, l.iso8601Formatter("[WARNING] ", format, v...))
 	}
 }
 
 func (l *Logger) Error(format string, v ...interface{}) {
+	if l == nil || l.level > LogLevelError {
+		return
+	}
 	if l.level <= LogLevelError {
 		l.Output(2, l.iso8601Formatter("[ERROR] ", format, v...))
 	}

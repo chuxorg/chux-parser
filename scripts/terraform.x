@@ -7,7 +7,7 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: us-east-1
+      AWS_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
     - name: Checkout repository
@@ -20,13 +20,13 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t chux-lambda-parser:latest .
+        docker build -t chux-parser:latest .
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1 
+        aws-region: ${{ secrets.AWS_REGION }} 
     
     - name: Login to Amazon ECR
       id: login-ecr
@@ -34,11 +34,11 @@ jobs:
       
     - name: Tag Docker image
       run: |
-        docker tag chux-lambda-parser:latest ${{ steps.login-ecr.outputs.registry }}/chux-lambda-parser:${GITHUB_REF##*/}
+        docker tag chux-parser:latest ${{ steps.login-ecr.outputs.registry }}/chux-parser:${GITHUB_REF##*/}
 
     - name: Push Docker image to Amazon ECR
       run: |
-        docker push ${{ steps.login-ecr.outputs.registry }}/chux-lambda-parser:${GITHUB_REF##*/}
+        docker push ${{ steps.login-ecr.outputs.registry }}/chux-parser:${GITHUB_REF##*/}
         
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
@@ -53,8 +53,8 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_SDK_LOAD_CONFIG: 1
         TF_VAR_s3_bucket_name: chux-terraform-state
-        TF_VAR_s3_key: chux-lambda-terraform.tfstate
-        TF_VAR_s3_region: us-east-1
+        TF_VAR_s3_key: chux-parser-terraform.tfstate
+        TF_VAR_s3_region: ${{ secrets.AWS_REGION }}
         TF_VAR_s3_encrypt: true
 
     - name: Terraform Validate
@@ -63,13 +63,13 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1
+        AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_SDK_LOAD_CONFIG: 1
 
     - name: Update Terraform variable with image URI
       run: |
         TAG_NAME=${GITHUB_REF##*/}
-        echo "image_uri = \"${{ steps.login-ecr.outputs.registry }}/chux-lambda-parser:${TAG_NAME}\"" > tf/variables.auto.tfvars
+        echo "image_uri = \"${{ steps.login-ecr.outputs.registry }}/chux-parser:${TAG_NAME}\"" > tf/variables.auto.tfvars
 
     - name: Terraform Plan
       run: terraform plan -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" -var="aws_region=${{ secrets.AWS_REGION }}"
@@ -77,7 +77,7 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1
+        AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_SDK_LOAD_CONFIG: 1
     
     - name: Terraform Apply
@@ -86,5 +86,5 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1
+        AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_SDK_LOAD_CONFIG: 1

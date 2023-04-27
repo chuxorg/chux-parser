@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "chux_task_definition" {
   execution_role_arn    = aws_iam_role.ecs_execution_role.arn
   container_definitions = jsonencode([{
     name  = "chux-container"
-    image = "${aws_ecr_repository.chux_lambda_parser.repository_url}:latest"
+    image = "${aws_ecr_repository.chux_parser.repository_url}:latest"
     essential = true
     environment = [
       { name = "AWS_BUCKET", value = "chux-crawler" },
@@ -123,6 +123,6 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_policy" {
 }
 
 resource "aws_ecr_repository" "chux_lambda_parser" {
-  name = "chux-lambda-parser"
+  name = "chux-parser"
 }
 

@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.250
-	github.com/chuxorg/chux-models v1.2.52
+	github.com/chuxorg/chux-models v1.2.53
 	github.com/gin-gonic/gin v1.9.0
 	go.mongodb.org/mongo-driver v1.11.4
 )

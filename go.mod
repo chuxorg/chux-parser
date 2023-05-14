@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.262
-	github.com/chuxorg/chux-models v1.2.55
+	github.com/chuxorg/chux-models v1.2.56
 	github.com/gin-gonic/gin v1.9.0
 	go.mongodb.org/mongo-driver v1.11.6
 )
@@ -12,7 +12,7 @@ require (
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/chuxorg/chux-datastore v1.2.15 // indirect
+	github.com/chuxorg/chux-datastore v1.2.16 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
